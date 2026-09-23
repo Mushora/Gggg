@@ -312,22 +312,128 @@ function ensureLocalSeedData() {
   }
 }
 
-// Compute SHA-256 hash using Web Crypto API
-export async function hashPassword(password) {
-  const enc = new TextEncoder();
-  const data = enc.encode(password + 'mushora-salt-2026');
-  const buffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(buffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+// Pure JavaScript SHA-256 implementation (works in HopWeb, Android WebViews, insecure contexts, and file://)
+function utf8Encode(str) {
+  try {
+    return unescape(encodeURIComponent(str));
+  } catch (e) {
+    return str;
+  }
 }
 
-// Compute raw SHA-256 without salt (for backwards compatibility)
+export function pureSha256(str) {
+  function rightRotate(value, amount) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+
+  const ascii = utf8Encode(str);
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  let result = '';
+  const words = [];
+  const asciiBitLength = ascii.length * 8;
+  const hash = [];
+  const k = [];
+  let primeCounter = 0;
+  const isComposite = {};
+
+  for (let candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (let i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+      k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+    }
+  }
+
+  let paddedAscii = ascii + '\x80';
+  while (paddedAscii.length % 64 !== 56) paddedAscii += '\x00';
+  for (let i = 0; i < paddedAscii.length; i++) {
+    const j = paddedAscii.charCodeAt(i);
+    words[i >> 2] |= j << ((3 - i % 4) * 8);
+  }
+  words[words.length] = ((asciiBitLength / maxWord) | 0);
+  words[words.length] = (asciiBitLength) | 0;
+
+  for (let j = 0; j < words.length;) {
+    const w = words.slice(j, j += 16);
+    let a = hash[0], b = hash[1], c = hash[2], d = hash[3],
+        e = hash[4], f = hash[5], g = hash[6], h = hash[7];
+
+    for (let i = 0; i < 64; i++) {
+      const w15 = w[i - 15], w2 = w[i - 2];
+      const s0 = (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3));
+      const s1 = (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10));
+      if (i >= 16) {
+        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+      }
+      const S1 = (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25));
+      const ch = (e & f) ^ ((~e) & g);
+      const temp1 = (h + S1 + ch + k[i] + w[i]) | 0;
+      const S0 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22));
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const temp2 = (S0 + maj) | 0;
+
+      h = g;
+      g = f;
+      f = e;
+      e = (d + temp1) | 0;
+      d = c;
+      c = b;
+      b = a;
+      a = (temp1 + temp2) | 0;
+    }
+
+    hash[0] = (hash[0] + a) | 0;
+    hash[1] = (hash[1] + b) | 0;
+    hash[2] = (hash[2] + c) | 0;
+    hash[3] = (hash[3] + d) | 0;
+    hash[4] = (hash[4] + e) | 0;
+    hash[5] = (hash[5] + f) | 0;
+    hash[6] = (hash[6] + g) | 0;
+    hash[7] = (hash[7] + h) | 0;
+  }
+
+  for (let i = 0; i < 8; i++) {
+    for (let j = 3; j >= 0; j--) {
+      const b = (hash[i] >> (j * 8)) & 255;
+      result += ((b < 16) ? '0' : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+
+// Compute SHA-256 hash safely in any environment (WebCrypto Subtle or pure JS fallback)
+export async function hashPassword(password) {
+  try {
+    const subtle = typeof window !== 'undefined' && window.crypto && window.crypto.subtle;
+    if (subtle && typeof subtle.digest === 'function') {
+      const enc = new TextEncoder();
+      const data = enc.encode(password + 'mushora-salt-2026');
+      const buffer = await subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(buffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+  } catch (e) {
+    // Subtle crypto unavailable or insecure context
+  }
+  return pureSha256(password + 'mushora-salt-2026');
+}
+
+// Compute raw SHA-256 without salt safely in any environment
 export async function hashPasswordRaw(password) {
-  const enc = new TextEncoder();
-  const data = enc.encode(password);
-  const buffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(buffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  try {
+    const subtle = typeof window !== 'undefined' && window.crypto && window.crypto.subtle;
+    if (subtle && typeof subtle.digest === 'function') {
+      const enc = new TextEncoder();
+      const data = enc.encode(password);
+      const buffer = await subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(buffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+  } catch (e) {
+    // Subtle crypto unavailable or insecure context
+  }
+  return pureSha256(password);
 }
 
 /* ============================================================
@@ -632,6 +738,8 @@ export async function deleteProduct(id) {
    Uses secure SHA-256 hashing and session tokens.
    Never exposes plaintext passwords.
    ============================================================ */
+let inMemorySession = null;
+
 export async function adminLogin(username, password) {
   const cleanUsername = (username || '').trim();
   const cleanPassword = password || '';
@@ -639,6 +747,9 @@ export async function adminLogin(username, password) {
   if (!cleanUsername || !cleanPassword) {
     throw new Error('Please enter both your username and password.');
   }
+
+  // Fast-track validation for default admin credentials
+  const isDefaultAdmin = (cleanUsername.toLowerCase() === 'admin' && cleanPassword === 'admin123');
 
   const { isLive, auth, db } = await initFirebase();
 
@@ -653,7 +764,7 @@ export async function adminLogin(username, password) {
         username: cleanUsername,
         loginAt: Date.now()
       };
-      sessionStorage.setItem(LS_KEYS.SESSION, JSON.stringify(session));
+      saveSession(session);
       return { success: true, user: cred.user };
     } catch (err) {
       // Firebase Auth user might not exist yet, continue to document check
@@ -693,8 +804,12 @@ export async function adminLogin(username, password) {
   }
 
   if (!adminConfig) {
-    const raw = localStorage.getItem(LS_KEYS.ADMIN);
-    adminConfig = raw ? JSON.parse(raw) : null;
+    try {
+      const raw = localStorage.getItem(LS_KEYS.ADMIN);
+      adminConfig = raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      adminConfig = null;
+    }
   }
 
   // Final fallback to default credentials
@@ -707,23 +822,24 @@ export async function adminLogin(username, password) {
     };
   }
 
-  // Calculate both salted and raw hashes
+  // Calculate hashes
   const saltedHash = await hashPassword(cleanPassword);
   const rawHash = await hashPasswordRaw(cleanPassword);
 
   const usernameMatches = adminConfig.username.toLowerCase() === cleanUsername.toLowerCase();
   const passwordMatches = (
+    isDefaultAdmin ||
     adminConfig.passwordHash === saltedHash ||
-    adminConfig.passwordHash === rawHash ||
-    // If testing standard default admin123
-    (cleanPassword === 'admin123' && cleanUsername.toLowerCase() === 'admin')
+    adminConfig.passwordHash === rawHash
   );
 
   if (usernameMatches && passwordMatches) {
     // If the record had the legacy raw hash, upgrade it to salted hash
     if (adminConfig.passwordHash !== saltedHash) {
       adminConfig.passwordHash = saltedHash;
-      localStorage.setItem(LS_KEYS.ADMIN, JSON.stringify(adminConfig));
+      try {
+        localStorage.setItem(LS_KEYS.ADMIN, JSON.stringify(adminConfig));
+      } catch (e) {}
       if (isLive && db) {
         try {
           const { doc, setDoc } = await import('firebase/firestore');
@@ -739,41 +855,77 @@ export async function adminLogin(username, password) {
       username: adminConfig.username,
       loginAt: Date.now()
     };
-    sessionStorage.setItem(LS_KEYS.SESSION, JSON.stringify(session));
+    saveSession(session);
     return { success: true, username: adminConfig.username };
   }
 
   throw new Error('Invalid administrative username or password. Please verify your credentials.');
 }
 
+function saveSession(session) {
+  inMemorySession = session;
+  try {
+    sessionStorage.setItem(LS_KEYS.SESSION, JSON.stringify(session));
+  } catch (e) {}
+  try {
+    localStorage.setItem(LS_KEYS.SESSION, JSON.stringify(session));
+  } catch (e) {}
+}
 
 export function isUserAdminLoggedIn() {
   try {
-    const raw = sessionStorage.getItem(LS_KEYS.SESSION);
-    if (!raw) return false;
-    const session = JSON.parse(raw);
+    let raw = null;
+    try {
+      raw = sessionStorage.getItem(LS_KEYS.SESSION);
+    } catch (e) {}
+    if (!raw) {
+      try {
+        raw = localStorage.getItem(LS_KEYS.SESSION);
+      } catch (e) {}
+    }
+
+    let session = null;
+    if (raw) {
+      session = JSON.parse(raw);
+    } else if (inMemorySession) {
+      session = inMemorySession;
+    }
+
+    if (!session) return false;
+
     // Session expires after 24 hours
     if (Date.now() - session.loginAt > 24 * 60 * 60 * 1000) {
-      sessionStorage.removeItem(LS_KEYS.SESSION);
+      adminLogout();
       return false;
     }
     return Boolean(session.token);
   } catch (e) {
-    return false;
+    return inMemorySession ? Boolean(inMemorySession.token) : false;
   }
 }
 
 export function getAdminSession() {
   try {
-    const raw = sessionStorage.getItem(LS_KEYS.SESSION);
-    return raw ? JSON.parse(raw) : null;
+    let raw = null;
+    try {
+      raw = sessionStorage.getItem(LS_KEYS.SESSION);
+    } catch (e) {}
+    if (!raw) {
+      try {
+        raw = localStorage.getItem(LS_KEYS.SESSION);
+      } catch (e) {}
+    }
+    return raw ? JSON.parse(raw) : (inMemorySession || null);
   } catch (e) {
-    return null;
+    return inMemorySession || null;
   }
 }
 
 export async function adminLogout() {
-  sessionStorage.removeItem(LS_KEYS.SESSION);
+  inMemorySession = null;
+  try { sessionStorage.removeItem(LS_KEYS.SESSION); } catch (e) {}
+  try { localStorage.removeItem(LS_KEYS.SESSION); } catch (e) {}
+
   const { isLive, auth } = await initFirebase();
   if (isLive && auth) {
     try {
@@ -831,7 +983,7 @@ export async function updateAdminCredentials(newUsername, newPassword) {
   const session = getAdminSession();
   if (session) {
     session.username = record.username;
-    sessionStorage.setItem(LS_KEYS.SESSION, JSON.stringify(session));
+    saveSession(session);
   }
 
   return true;
