@@ -258,19 +258,17 @@ function renderProducts(products, container) {
               ${prod.price ? escapeHtml(prod.price) : 'Check Price'}
             </div>
 
-            <!-- Direct Affiliate CTA with tracking attributes -->
+            <!-- Shop Deal CTA: Redirects to internal product page -->
             <a 
-              href="${escapeHtml(prod.affiliateUrl)}" 
-              target="_blank" 
-              rel="noopener noreferrer sponsored" 
+              href="/product.html?id=${encodeURIComponent(prod.id)}" 
               class="btn-affiliate-cta"
-              title="Shop ${escapeHtml(prod.title)} on partner store"
+              title="Shop Deal - View ${escapeHtml(prod.title)} details"
               onclick="event.stopPropagation();"
             >
               <span>Shop Deal</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="7" y1="17" x2="17" y2="7"></line>
-                <polyline points="7 7 17 7 17 17"></polyline>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
             </a>
           </div>
