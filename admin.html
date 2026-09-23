@@ -7,6 +7,17 @@
   <meta name="description" content="Mushora administrative management portal." />
   <meta name="robots" content="noindex, nofollow" />
   
+  <!-- Import Map: Enables HopWeb, Android WebViews, and direct browser previews to resolve Firebase modules from Google CDN -->
+  <script type="importmap">
+  {
+    "imports": {
+      "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+      "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+      "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+    }
+  }
+  </script>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -96,7 +107,15 @@
           </p>
         </div>
 
-        <div class="admin-topbar-actions">
+        <div class="admin-topbar-actions" style="display: flex; align-items: center; gap: 8px;">
+          <button class="btn-secondary" id="syncCloudBtn" title="Sync products between HopWeb and Google AI Studio" style="display: flex; align-items: center; gap: 6px; padding: 0.55rem 0.9rem; font-size: 0.82rem;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span id="syncBtnText">Sync Cloud</span>
+          </button>
           <button class="btn-primary" id="openAddProductModalBtn">
             + Add New Product
           </button>

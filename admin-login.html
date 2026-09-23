@@ -7,6 +7,17 @@
   <meta name="description" content="Mushora administrative management console sign-in." />
   <meta name="robots" content="noindex, nofollow" />
   
+  <!-- Import Map: Enables HopWeb, Android WebViews, and direct browser previews to resolve Firebase modules from Google CDN -->
+  <script type="importmap">
+  {
+    "imports": {
+      "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+      "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+      "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+    }
+  }
+  </script>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="admin-login-body">

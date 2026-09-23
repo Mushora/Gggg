@@ -36,17 +36,75 @@ let firestoreDb = null;
 let firebaseAuth = null;
 let isInitialized = false;
 
+// Cached SDK modules
+let fbSdk = null;
+
+/**
+ * Universal Firebase SDK loader.
+ * Works seamlessly in Vite/bundlers (Google AI Studio) and standalone browsers (HopWeb on Android).
+ */
+export async function getFirebaseSdk() {
+  if (fbSdk) return fbSdk;
+
+  // 1. Try standard bare specifier (bundled in Vite / AI Studio or browser with importmap)
+  try {
+    const app = await import('firebase/app');
+    const firestore = await import('firebase/firestore');
+    const auth = await import('firebase/auth');
+    fbSdk = { ...app, ...firestore, ...auth };
+    return fbSdk;
+  } catch (e1) {
+    console.log('Bare module import failed, attempting direct Google CDN load for HopWeb/Android WebView...', e1);
+  }
+
+  // 2. Official Google CDN ES Modules (HopWeb / Android WebView fallback)
+  try {
+    const cdnApp = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    const cdnFirestore = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    const cdnAuth = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+    const [app, firestore, auth] = await Promise.all([
+      import(/* @vite-ignore */ cdnApp),
+      import(/* @vite-ignore */ cdnFirestore),
+      import(/* @vite-ignore */ cdnAuth)
+    ]);
+    fbSdk = { ...app, ...firestore, ...auth };
+    return fbSdk;
+  } catch (e2) {
+    console.warn('Google CDN load failed, attempting esm.sh CDN fallback...', e2);
+  }
+
+  // 3. esm.sh CDN fallback
+  try {
+    const cdnApp = 'https://esm.sh/firebase@10.8.0/app';
+    const cdnFirestore = 'https://esm.sh/firebase@10.8.0/firestore';
+    const cdnAuth = 'https://esm.sh/firebase@10.8.0/auth';
+
+    const [app, firestore, auth] = await Promise.all([
+      import(/* @vite-ignore */ cdnApp),
+      import(/* @vite-ignore */ cdnFirestore),
+      import(/* @vite-ignore */ cdnAuth)
+    ]);
+    fbSdk = { ...app, ...firestore, ...auth };
+    return fbSdk;
+  } catch (e3) {
+    console.error('All Firebase SDK loaders failed:', e3);
+    throw e3;
+  }
+}
+
 /**
  * Initialize Firebase services
  */
 export async function initFirebase() {
-  if (isInitialized) return { isLive: isFirebaseConfigured(), db: firestoreDb, auth: firebaseAuth };
+  if (isInitialized && firestoreDb) {
+    return { isLive: true, db: firestoreDb, auth: firebaseAuth };
+  }
 
   if (isFirebaseConfigured()) {
     try {
-      const { initializeApp, getApps } = await import('firebase/app');
-      const { getFirestore } = await import('firebase/firestore');
-      const { getAuth } = await import('firebase/auth');
+      const sdk = await getFirebaseSdk();
+      const { initializeApp, getApps, getFirestore, getAuth } = sdk;
 
       if (!getApps().length) {
         firebaseApp = initializeApp(firebaseConfig);
@@ -66,7 +124,10 @@ export async function initFirebase() {
       console.log('Mushora: Connected to live Firebase Firestore & Auth.');
 
       // Auto-ensure initial dataset in Firestore if empty
-      autoSeedFirestoreIfEmpty(firestoreDb);
+      await autoSeedFirestoreIfEmpty(firestoreDb);
+
+      // Automatically sync any products created offline or on HopWeb to Firestore
+      syncLocalProductsToCloud().catch(err => console.warn('Background sync note:', err));
 
       return { isLive: true, db: firestoreDb, auth: firebaseAuth };
     } catch (err) {
@@ -81,11 +142,57 @@ export async function initFirebase() {
 }
 
 /**
+ * Sync offline/HopWeb products from local storage to live Firestore
+ */
+export async function syncLocalProductsToCloud() {
+  if (!firestoreDb) return { syncedCount: 0 };
+  if (typeof localStorage === 'undefined') return { syncedCount: 0 };
+  try {
+    const raw = localStorage.getItem(LS_KEYS.PRODUCTS);
+    if (!raw) return { syncedCount: 0 };
+    const localProds = JSON.parse(raw);
+    if (!Array.isArray(localProds) || localProds.length === 0) return { syncedCount: 0 };
+
+    const sdk = await getFirebaseSdk();
+    const { collection, getDocs, doc, setDoc } = sdk;
+
+    const snap = await getDocs(collection(firestoreDb, 'products'));
+    const remoteIds = new Set(snap.docs.map(d => d.id));
+    const remoteTitles = new Set(snap.docs.map(d => (d.data().title || '').trim().toLowerCase()));
+
+    let syncedCount = 0;
+    for (const p of localProds) {
+      const cleanTitle = (p.title || '').trim().toLowerCase();
+      // Only sync if not already in Firestore
+      if (cleanTitle && !remoteTitles.has(cleanTitle) && !remoteIds.has(p.id)) {
+        const { id, ...data } = p;
+        const newDocRef = doc(collection(firestoreDb, 'products'));
+        await setDoc(newDocRef, {
+          ...data,
+          createdAt: data.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+        remoteTitles.add(cleanTitle);
+        syncedCount++;
+      }
+    }
+    if (syncedCount > 0) {
+      console.log(`Mushora: Successfully synced ${syncedCount} offline/HopWeb products to live Firestore!`);
+    }
+    return { syncedCount };
+  } catch (err) {
+    console.warn('Sync local products note:', err);
+    return { syncedCount: 0, error: err };
+  }
+}
+
+/**
  * Automatically seed starter categories & products on first run if database is blank
  */
 async function autoSeedFirestoreIfEmpty(db) {
   try {
-    const { collection, getDocs, doc, setDoc } = await import('firebase/firestore');
+    const sdk = await getFirebaseSdk();
+    const { collection, getDocs, doc, setDoc } = sdk;
     const snap = await getDocs(collection(db, 'categories'));
     if (snap.empty) {
       console.log('Mushora: First run detected. Populating Firestore with starter fashion collections...');
@@ -444,11 +551,19 @@ export async function getCategories() {
 
   if (isLive && db) {
     try {
-      const { collection, getDocs, orderBy, query } = await import('firebase/firestore');
-      const catsRef = collection(db, 'categories');
-      const snap = await getDocs(query(catsRef, orderBy('name', 'asc')));
+      const sdk = await getFirebaseSdk();
+      const catsRef = sdk.collection(db, 'categories');
+      let snap;
+      try {
+        snap = await sdk.getDocs(sdk.query(catsRef, sdk.orderBy('name', 'asc')));
+      } catch (qErr) {
+        snap = await sdk.getDocs(catsRef);
+      }
       if (!snap.empty) {
-        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const cats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        cats.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        try { localStorage.setItem(LS_KEYS.CATEGORIES, JSON.stringify(cats)); } catch (e) {}
+        return cats;
       }
     } catch (err) {
       console.warn('Firestore categories query failed, using local store:', err);
@@ -473,9 +588,15 @@ export async function addCategory(categoryData) {
 
   if (isLive && db) {
     try {
-      const { collection, addDoc } = await import('firebase/firestore');
-      const docRef = await addDoc(collection(db, 'categories'), cat);
-      return { id: docRef.id, ...cat };
+      const sdk = await getFirebaseSdk();
+      const docRef = await sdk.addDoc(sdk.collection(db, 'categories'), cat);
+      const newCat = { id: docRef.id, ...cat };
+      try {
+        const cats = JSON.parse(localStorage.getItem(LS_KEYS.CATEGORIES) || '[]');
+        cats.push(newCat);
+        localStorage.setItem(LS_KEYS.CATEGORIES, JSON.stringify(cats));
+      } catch (e) {}
+      return newCat;
     } catch (err) {
       console.error('Firestore addCategory error:', err);
       throw err;
@@ -503,8 +624,16 @@ export async function updateCategory(id, categoryData) {
 
   if (isLive && db) {
     try {
-      const { doc, updateDoc } = await import('firebase/firestore');
-      await updateDoc(doc(db, 'categories', id), updates);
+      const sdk = await getFirebaseSdk();
+      await sdk.updateDoc(sdk.doc(db, 'categories', id), updates);
+      try {
+        const cats = JSON.parse(localStorage.getItem(LS_KEYS.CATEGORIES) || '[]');
+        const index = cats.findIndex(c => c.id === id);
+        if (index !== -1) {
+          cats[index] = { ...cats[index], ...updates };
+          localStorage.setItem(LS_KEYS.CATEGORIES, JSON.stringify(cats));
+        }
+      } catch (e) {}
       return { id, ...updates };
     } catch (err) {
       console.error('Firestore updateCategory error:', err);
@@ -529,8 +658,13 @@ export async function deleteCategory(id) {
 
   if (isLive && db) {
     try {
-      const { doc, deleteDoc } = await import('firebase/firestore');
-      await deleteDoc(doc(db, 'categories', id));
+      const sdk = await getFirebaseSdk();
+      await sdk.deleteDoc(sdk.doc(db, 'categories', id));
+      try {
+        let cats = JSON.parse(localStorage.getItem(LS_KEYS.CATEGORIES) || '[]');
+        cats = cats.filter(c => c.id !== id);
+        localStorage.setItem(LS_KEYS.CATEGORIES, JSON.stringify(cats));
+      } catch (e) {}
       return true;
     } catch (err) {
       console.error('Firestore deleteCategory error:', err);
@@ -555,10 +689,18 @@ export async function getProducts(options = {}) {
 
   if (isLive && db) {
     try {
-      const { collection, getDocs, orderBy, query } = await import('firebase/firestore');
-      const snap = await getDocs(query(collection(db, 'products'), orderBy('createdAt', 'desc')));
+      const sdk = await getFirebaseSdk();
+      let snap;
+      try {
+        snap = await sdk.getDocs(sdk.query(sdk.collection(db, 'products'), sdk.orderBy('createdAt', 'desc')));
+      } catch (qErr) {
+        snap = await sdk.getDocs(sdk.collection(db, 'products'));
+      }
       if (!snap.empty) {
         items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        try {
+          localStorage.setItem(LS_KEYS.PRODUCTS, JSON.stringify(items));
+        } catch (e) {}
       }
     } catch (err) {
       console.warn('Firestore products fetch failed, using local store:', err);
@@ -602,6 +744,9 @@ export async function getProducts(options = {}) {
     } else if (options.sortBy === 'newest') {
       filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     }
+  } else {
+    // Default newest first
+    filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   }
 
   return filtered;
@@ -613,8 +758,8 @@ export async function getProductById(id) {
 
   if (isLive && db) {
     try {
-      const { doc, getDoc } = await import('firebase/firestore');
-      const snap = await getDoc(doc(db, 'products', id));
+      const sdk = await getFirebaseSdk();
+      const snap = await sdk.getDoc(sdk.doc(db, 'products', id));
       if (snap.exists()) {
         return { id: snap.id, ...snap.data() };
       }
@@ -651,9 +796,15 @@ export async function addProduct(productData) {
 
   if (isLive && db) {
     try {
-      const { collection, addDoc } = await import('firebase/firestore');
-      const docRef = await addDoc(collection(db, 'products'), prod);
-      return { id: docRef.id, ...prod };
+      const sdk = await getFirebaseSdk();
+      const docRef = await sdk.addDoc(sdk.collection(db, 'products'), prod);
+      const newProd = { id: docRef.id, ...prod };
+      try {
+        const prods = JSON.parse(localStorage.getItem(LS_KEYS.PRODUCTS) || '[]');
+        prods.unshift(newProd);
+        localStorage.setItem(LS_KEYS.PRODUCTS, JSON.stringify(prods));
+      } catch (e) {}
+      return newProd;
     } catch (err) {
       console.error('Firestore addProduct error:', err);
       throw err;
@@ -690,8 +841,16 @@ export async function updateProduct(id, productData) {
 
   if (isLive && db) {
     try {
-      const { doc, updateDoc } = await import('firebase/firestore');
-      await updateDoc(doc(db, 'products', id), updates);
+      const sdk = await getFirebaseSdk();
+      await sdk.updateDoc(sdk.doc(db, 'products', id), updates);
+      try {
+        const prods = JSON.parse(localStorage.getItem(LS_KEYS.PRODUCTS) || '[]');
+        const index = prods.findIndex(p => p.id === id);
+        if (index !== -1) {
+          prods[index] = { ...prods[index], ...updates };
+          localStorage.setItem(LS_KEYS.PRODUCTS, JSON.stringify(prods));
+        }
+      } catch (e) {}
       return { id, ...updates };
     } catch (err) {
       console.error('Firestore updateProduct error:', err);
@@ -716,8 +875,13 @@ export async function deleteProduct(id) {
 
   if (isLive && db) {
     try {
-      const { doc, deleteDoc } = await import('firebase/firestore');
-      await deleteDoc(doc(db, 'products', id));
+      const sdk = await getFirebaseSdk();
+      await sdk.deleteDoc(sdk.doc(db, 'products', id));
+      try {
+        let prods = JSON.parse(localStorage.getItem(LS_KEYS.PRODUCTS) || '[]');
+        prods = prods.filter(p => p.id !== id);
+        localStorage.setItem(LS_KEYS.PRODUCTS, JSON.stringify(prods));
+      } catch (e) {}
       return true;
     } catch (err) {
       console.error('Firestore deleteProduct error:', err);
@@ -756,9 +920,9 @@ export async function adminLogin(username, password) {
   // If live Firebase Auth is configured with email/password
   if (isLive && auth) {
     try {
-      const { signInWithEmailAndPassword } = await import('firebase/auth');
+      const sdk = await getFirebaseSdk();
       const email = cleanUsername.includes('@') ? cleanUsername : `${cleanUsername}@mushora.internal`;
-      const cred = await signInWithEmailAndPassword(auth, email, cleanPassword);
+      const cred = await sdk.signInWithEmailAndPassword(auth, email, cleanPassword);
       const session = {
         token: cred.user.uid,
         username: cleanUsername,
@@ -778,9 +942,9 @@ export async function adminLogin(username, password) {
 
   if (isLive && db) {
     try {
-      const { doc, getDoc, setDoc } = await import('firebase/firestore');
-      const docRef = doc(db, 'adminSettings', 'credentials');
-      const snap = await getDoc(docRef);
+      const sdk = await getFirebaseSdk();
+      const docRef = sdk.doc(db, 'adminSettings', 'credentials');
+      const snap = await sdk.getDoc(docRef);
       if (snap.exists()) {
         adminConfig = snap.data();
       } else {
@@ -793,7 +957,7 @@ export async function adminLogin(username, password) {
           updatedAt: new Date().toISOString()
         };
         try {
-          await setDoc(docRef, adminConfig);
+          await sdk.setDoc(docRef, adminConfig);
         } catch (setErr) {
           console.warn('Could not auto-write initial admin document:', setErr);
         }
@@ -842,8 +1006,8 @@ export async function adminLogin(username, password) {
       } catch (e) {}
       if (isLive && db) {
         try {
-          const { doc, setDoc } = await import('firebase/firestore');
-          await setDoc(doc(db, 'adminSettings', 'credentials'), adminConfig, { merge: true });
+          const sdk = await getFirebaseSdk();
+          await sdk.setDoc(sdk.doc(db, 'adminSettings', 'credentials'), adminConfig, { merge: true });
         } catch (e) {
           // Non-critical upgrade error
         }
@@ -929,8 +1093,8 @@ export async function adminLogout() {
   const { isLive, auth } = await initFirebase();
   if (isLive && auth) {
     try {
-      const { signOut } = await import('firebase/auth');
-      await signOut(auth);
+      const sdk = await getFirebaseSdk();
+      await sdk.signOut(auth);
     } catch (e) {
       // Ignore
     }
@@ -959,8 +1123,8 @@ export async function updateAdminCredentials(newUsername, newPassword) {
   // If live Firestore is connected, persist to /adminSettings/credentials
   if (isLive && db) {
     try {
-      const { doc, setDoc } = await import('firebase/firestore');
-      await setDoc(doc(db, 'adminSettings', 'credentials'), record);
+      const sdk = await getFirebaseSdk();
+      await sdk.setDoc(sdk.doc(db, 'adminSettings', 'credentials'), record);
     } catch (err) {
       console.warn('Failed saving credentials to Firestore:', err);
     }
@@ -969,8 +1133,8 @@ export async function updateAdminCredentials(newUsername, newPassword) {
   // Also update Firebase Auth password if current user is logged in
   if (isLive && auth && auth.currentUser) {
     try {
-      const { updatePassword } = await import('firebase/auth');
-      await updatePassword(auth.currentUser, newPassword);
+      const sdk = await getFirebaseSdk();
+      await sdk.updatePassword(auth.currentUser, newPassword);
     } catch (err) {
       console.warn('Firebase Auth password update note:', err.message);
     }
@@ -998,11 +1162,11 @@ export async function seedLiveFirestore() {
     throw new Error('Firebase credentials are not configured yet.');
   }
 
-  const { collection, doc, setDoc, getDocs } = await import('firebase/firestore');
+  const sdk = await getFirebaseSdk();
 
   // Seed categories
   for (const cat of INITIAL_CATEGORIES) {
-    await setDoc(doc(db, 'categories', cat.id), {
+    await sdk.setDoc(sdk.doc(db, 'categories', cat.id), {
       name: cat.name,
       slug: cat.slug,
       description: cat.description,
@@ -1014,7 +1178,7 @@ export async function seedLiveFirestore() {
   // Seed products
   for (const prod of INITIAL_PRODUCTS) {
     const { id, ...data } = prod;
-    await setDoc(doc(db, 'products', id), data);
+    await sdk.setDoc(sdk.doc(db, 'products', id), data);
   }
 
   return true;

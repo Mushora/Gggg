@@ -8,6 +8,7 @@ import {
   adminLogout,
   initFirebase,
   isFirebaseConfigured,
+  syncLocalProductsToCloud,
   getCategories,
   addCategory,
   updateCategory,
@@ -46,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initFirebase();
   initTabNavigation();
   initLogout();
+  initSyncButton();
   initProductModal();
   initCategoryActions();
   initSettingsForm();
@@ -54,6 +56,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load datasets
   await refreshAdminData();
 });
+
+function initSyncButton() {
+  const syncBtn = document.getElementById('syncCloudBtn');
+  const syncText = document.getElementById('syncBtnText');
+  if (!syncBtn) return;
+
+  syncBtn.addEventListener('click', async () => {
+    syncBtn.disabled = true;
+    if (syncText) syncText.textContent = 'Syncing...';
+    try {
+      const res = await syncLocalProductsToCloud();
+      await refreshAdminData();
+      if (res && res.syncedCount > 0) {
+        showToast(`Synced ${res.syncedCount} offline product(s) to cloud!`);
+      } else {
+        showToast('All products are in sync with cloud database.');
+      }
+    } catch (err) {
+      console.error('Manual sync error:', err);
+      showToast('Sync error: ' + (err.message || 'Check network'), 'error');
+    } finally {
+      syncBtn.disabled = false;
+      if (syncText) syncText.textContent = 'Sync Cloud';
+    }
+  });
+}
 
 /* ============================================================
    DATA REFRESH & STATS CALCULATION
