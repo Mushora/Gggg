@@ -221,7 +221,7 @@ function renderProducts(products, container) {
       <article class="product-card" data-product-id="${escapeHtml(prod.id)}">
         <div class="product-image-container">
           ${prod.offer ? `<span class="product-badge ${prod.offer.includes('Limited') || prod.offer.includes('Choice') ? 'gold' : ''}">${escapeHtml(prod.offer)}</span>` : ''}
-          <a href="/product.html?id=${encodeURIComponent(prod.id)}" aria-label="View ${escapeHtml(prod.title)} details">
+          <a href="product.html?id=${encodeURIComponent(prod.id)}" aria-label="View ${escapeHtml(prod.title)} details">
             <img 
               src="${escapeHtml(prod.image1)}" 
               alt="${escapeHtml(prod.title)}" 
@@ -231,7 +231,7 @@ function renderProducts(products, container) {
             />
           </a>
           <div class="product-quick-action">
-            <a href="/product.html?id=${encodeURIComponent(prod.id)}" class="btn-card-preview">
+            <a href="product.html?id=${encodeURIComponent(prod.id)}" class="btn-card-preview">
               View Piece
             </a>
           </div>
@@ -248,7 +248,7 @@ function renderProducts(products, container) {
           </div>
 
           <h3 class="product-title">
-            <a href="/product.html?id=${encodeURIComponent(prod.id)}">
+            <a href="product.html?id=${encodeURIComponent(prod.id)}">
               ${escapeHtml(prod.title)}
             </a>
           </h3>
@@ -260,7 +260,7 @@ function renderProducts(products, container) {
 
             <!-- Shop Deal CTA: Redirects to internal product page -->
             <a 
-              href="/product.html?id=${encodeURIComponent(prod.id)}" 
+              href="product.html?id=${encodeURIComponent(prod.id)}" 
               class="btn-affiliate-cta"
               title="Shop Deal - View ${escapeHtml(prod.title)} details"
               onclick="event.stopPropagation();"

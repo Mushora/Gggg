@@ -31,7 +31,7 @@ let categoryPendingDeleteId = null;
 document.addEventListener('DOMContentLoaded', async () => {
   // Check Admin Authentication
   if (!isUserAdminLoggedIn()) {
-    window.location.replace('/admin-login.html');
+    window.location.replace('admin-login.html');
     return;
   }
 
@@ -108,7 +108,7 @@ function updateFirebaseStatusCard() {
     note.innerHTML = `
       <span style="color: #a37a36;">○ Running in Local Demo Storage.</span><br />
       <small style="color: var(--color-stone); font-size: 0.78rem;">
-        Insert your project API keys in <code>js/firebase.js</code> to link live Firestore.
+        Insert your project API keys in <code>firebase.js</code> to link live Firestore.
       </small>
     `;
   }
@@ -161,7 +161,7 @@ function initLogout() {
   logoutBtn.addEventListener('click', async () => {
     if (confirm('Are you sure you want to log out of the Mushora Admin Portal?')) {
       await adminLogout();
-      window.location.replace('/admin-login.html');
+      window.location.replace('admin-login.html');
     }
   });
 }
@@ -707,7 +707,7 @@ function initSeedHelper() {
   if (seedBtn) {
     seedBtn.addEventListener('click', async () => {
       if (!isFirebaseConfigured()) {
-        alert('Please first configure your Firebase credentials in js/firebase.js to seed your live database.');
+        alert('Please first configure your Firebase credentials in firebase.js to seed your live database.');
         return;
       }
       if (confirm('Seed the starter luxury fashion catalog (categories and products) into your live Firestore?')) {

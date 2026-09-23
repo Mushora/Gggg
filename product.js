@@ -232,7 +232,7 @@ async function loadRelatedProducts(currentProduct) {
       <article class="product-card">
         <div class="product-image-container">
           ${prod.offer ? `<span class="product-badge">${escapeHtml(prod.offer)}</span>` : ''}
-          <a href="/product.html?id=${encodeURIComponent(prod.id)}">
+          <a href="product.html?id=${encodeURIComponent(prod.id)}">
             <img src="${escapeHtml(prod.image1)}" alt="${escapeHtml(prod.title)}" class="product-image" loading="lazy" />
           </a>
         </div>
@@ -243,11 +243,11 @@ async function loadRelatedProducts(currentProduct) {
             <span class="product-rating">★ ${Number(prod.rating || 4.5).toFixed(1)}</span>
           </div>
           <h3 class="product-title">
-            <a href="/product.html?id=${encodeURIComponent(prod.id)}">${escapeHtml(prod.title)}</a>
+            <a href="product.html?id=${encodeURIComponent(prod.id)}">${escapeHtml(prod.title)}</a>
           </h3>
           <div class="product-footer">
             <div class="product-price-guide">${escapeHtml(prod.price || 'View Details')}</div>
-            <a href="/product.html?id=${encodeURIComponent(prod.id)}" class="btn-affiliate-cta">
+            <a href="product.html?id=${encodeURIComponent(prod.id)}" class="btn-affiliate-cta">
               View
             </a>
           </div>

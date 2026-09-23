@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // If already authenticated, redirect straight to dashboard
   if (isUserAdminLoggedIn()) {
-    window.location.replace('/admin.html');
+    window.location.replace('admin.html');
     return;
   }
 
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const result = await adminLogin(username, password);
       if (result && result.success) {
         // Successful login
-        window.location.replace('/admin.html');
+        window.location.replace('admin.html');
       } else {
         showError('Invalid administrative username or password.');
       }
