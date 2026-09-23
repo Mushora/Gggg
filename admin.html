@@ -467,79 +467,147 @@
     </div>
   </div>
 
-  <!-- DELETE PRODUCT CONFIRMATION MODAL -->
-  <div class="modal-overlay" id="deleteProductModal">
-    <div class="modal-dialog modal-sm">
-      <div class="modal-header">
-        <h2 class="modal-title">Delete Garment</h2>
-        <button class="modal-close-btn" id="closeDeleteProductModalBtn">&times;</button>
+  <!-- 3-STEP SECURITY DELETE MODAL (GitHub-Style Exact Name Confirmation & 3 Pop-up Stages) -->
+  <div class="modal-overlay" id="securityDeleteModal" style="display: none;">
+    <div class="modal-dialog modal-sm" style="max-width: 520px; overflow: hidden; border: 1px solid #fecaca; box-shadow: 0 20px 40px rgba(0,0,0,0.25);">
+      
+      <!-- Modal Header with Progress Step -->
+      <div class="modal-header" style="background-color: #fff5f5; border-bottom: 1px solid #fed7d7; padding: 18px 24px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 50%; background: #fee2e2; display: flex; align-items: center; justify-content: center; color: #dc2626; font-size: 1.2rem; flex-shrink: 0;">
+            ⚠️
+          </div>
+          <div>
+            <h2 class="modal-title" id="secDeleteModalTitle" style="color: #991b1b; font-size: 1.25rem; font-family: var(--font-serif); margin-bottom: 2px;">
+              Delete Confirmation
+            </h2>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="secDeleteStepBadge" style="background: #dc2626; color: #fff; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 10px; letter-spacing: 0.05em;">
+                Step 1 of 3
+              </span>
+              <span id="secDeleteStepSubtitle" style="font-size: 0.78rem; color: #7f1d1d; font-weight: 500;">
+                Initial Verification
+              </span>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" id="closeSecDeleteModalBtn" aria-label="Close" style="color: #991b1b;">&times;</button>
       </div>
-      <div class="modal-body">
-        <p style="font-size: 0.95rem; color: var(--color-dark-gray); line-height: 1.6;">
-          Are you sure you want to delete <strong id="deleteProductTitleTarget">this product</strong>?
-        </p>
-        <p style="font-size: 0.82rem; color: var(--color-stone); margin-top: 8px;">
-          This action will permanently remove the item from Firestore and the public website.
-        </p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-secondary" id="cancelDeleteProductBtn">Cancel</button>
-        <button type="button" class="btn-action-delete" id="confirmDeleteProductBtn" style="padding: 10px 20px;">
-          Delete Product
-        </button>
-      </div>
-    </div>
-  </div>
 
-  <!-- EDIT / RENAME CATEGORY MODAL -->
-  <div class="modal-overlay" id="editCategoryModal">
-    <div class="modal-dialog modal-sm">
-      <div class="modal-header">
-        <h2 class="modal-title">Rename Category</h2>
-        <button class="modal-close-btn" id="closeEditCategoryModalBtn">&times;</button>
+      <!-- 3-Stage Progress Indicator Bar -->
+      <div style="background: #fee2e2; height: 5px; width: 100%;">
+        <div id="secDeleteProgressBar" style="width: 33.33%; height: 100%; background: #dc2626; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></div>
       </div>
-      <form id="editCategoryForm">
-        <div class="modal-body">
-          <input type="hidden" id="editCatId" />
-          <div class="form-group">
-            <label for="editCatName" class="form-label">Category Name *</label>
-            <input type="text" id="editCatName" class="form-input" required />
-          </div>
-          <div class="form-group">
-            <label for="editCatSlug" class="form-label">Category Slug *</label>
-            <input type="text" id="editCatSlug" class="form-input" required />
-          </div>
-          <div class="form-group">
-            <label for="editCatDesc" class="form-label">Description</label>
-            <textarea id="editCatDesc" class="form-textarea" style="min-height: 70px;"></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" id="cancelEditCategoryBtn">Cancel</button>
-          <button type="submit" class="btn-primary">Update Category</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
-  <!-- DELETE CATEGORY WARNING MODAL -->
-  <div class="modal-overlay" id="deleteCategoryModal">
-    <div class="modal-dialog modal-sm">
-      <div class="modal-header">
-        <h2 class="modal-title">Delete Category</h2>
-        <button class="modal-close-btn" id="closeDeleteCategoryModalBtn">&times;</button>
+      <div class="modal-body" style="padding: 24px;">
+        
+        <!-- ================= STAGE 1 / 3 ================= -->
+        <div id="secDeleteStep1">
+          <div style="font-weight: 600; font-size: 1.05rem; color: var(--color-black); margin-bottom: 8px;">
+            Are you sure you want to delete this <span id="secDeleteTypeLabel1" style="text-transform: lowercase;">item</span>?
+          </div>
+          <p style="font-size: 0.88rem; color: var(--color-dark-gray); line-height: 1.5; margin-bottom: 16px;">
+            You are initiating permanent deletion for the following catalog item:
+          </p>
+
+          <div style="background-color: var(--color-ivory-warm); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 16px;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--color-stone); font-weight: 600; letter-spacing: 0.06em;" id="secDeleteTypeBadge">PRODUCT</div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: var(--color-black); word-break: break-word; margin-top: 4px;" id="secDeleteItemNameDisplay1">Item Name</div>
+            <div id="secDeleteExtraWarning" style="margin-top: 8px; font-size: 0.82rem; color: #b91c1c; font-weight: 500; display: none;"></div>
+          </div>
+
+          <div style="font-size: 0.82rem; color: #7f1d1d; background: #fff5f5; border-left: 3px solid #dc2626; padding: 10px 14px; border-radius: 2px;">
+            <strong>Confirmation 1/3:</strong> Once deleted, this item will immediately disappear from your public store and Firestore cloud database.
+          </div>
+        </div>
+
+        <!-- ================= STAGE 2 / 3 (Type XYZ to Confirm) ================= -->
+        <div id="secDeleteStep2" style="display: none;">
+          <div style="font-weight: 600; font-size: 1.05rem; color: var(--color-black); margin-bottom: 8px;">
+            Step 2: Type to Verify
+          </div>
+          <p style="font-size: 0.88rem; color: var(--color-dark-gray); line-height: 1.5; margin-bottom: 12px;">
+            To prevent accidental deletion, please type the exact <span id="secDeleteTypeLabel2">name</span> below:
+          </p>
+
+          <!-- Target Name Badge -->
+          <div style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <code id="secDeleteTargetBadge" style="font-size: 0.95rem; font-weight: 700; color: #0f172a; word-break: break-all;">xyz</code>
+            <button type="button" id="copySecDeleteTargetBtn" class="btn-outline" style="padding: 3px 8px; font-size: 0.72rem; white-space: nowrap; flex-shrink: 0;">
+              Copy Name
+            </button>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 8px;">
+            <label for="secDeleteConfirmInput" class="form-label" style="font-size: 0.8rem; font-weight: 600;">
+              Confirmation Text Input *
+            </label>
+            <input 
+              type="text" 
+              id="secDeleteConfirmInput" 
+              class="form-input" 
+              placeholder="Type exact name here..." 
+              autocomplete="off"
+              spellcheck="false"
+              style="padding: 11px 14px; font-size: 0.95rem; border-width: 2px; transition: border-color 0.2s;"
+            />
+          </div>
+
+          <!-- Real-time match status message -->
+          <div id="secDeleteMatchFeedback" style="font-size: 0.8rem; min-height: 22px; display: flex; align-items: center; gap: 6px; font-weight: 500;">
+            <span style="color: var(--color-stone);">Type the exact name above to unlock next confirmation.</span>
+          </div>
+        </div>
+
+        <!-- ================= STAGE 3 / 3 (Final Warning) ================= -->
+        <div id="secDeleteStep3" style="display: none;">
+          <div style="text-align: center; padding: 4px 0 12px;">
+            <div style="width: 54px; height: 54px; border-radius: 50%; background: #fee2e2; color: #dc2626; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; box-shadow: 0 0 0 8px #fef2f2;">
+              🚨
+            </div>
+            <div style="font-weight: 700; font-size: 1.25rem; color: #991b1b; margin-bottom: 6px; font-family: var(--font-serif);">
+              Final Confirmation (3 of 3)
+            </div>
+            <p style="font-size: 0.92rem; color: var(--color-dark-gray); line-height: 1.5; margin-bottom: 16px;">
+              Are you <strong>absolutely, positively certain</strong> you want to permanently delete:
+            </p>
+            
+            <div style="background: #fef2f2; border: 2px dashed #f87171; border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 18px;">
+              <span id="secDeleteItemNameDisplay3" style="font-size: 1.15rem; font-weight: 800; color: #7f1d1d; word-break: break-word;">xyz</span>
+            </div>
+
+            <p style="font-size: 0.8rem; color: #7f1d1d; line-height: 1.4; margin: 0;">
+              ⚠️ This is your last chance to turn back. Once clicked, this item cannot be recovered under any circumstance.
+            </p>
+          </div>
+        </div>
+
       </div>
-      <div class="modal-body">
-        <div id="deleteCategoryWarningNotice" style="font-size: 0.95rem; color: var(--color-dark-gray); line-height: 1.6;">
-          Are you sure you want to delete this category?
+
+      <!-- Modal Footer -->
+      <div class="modal-footer" style="background-color: var(--color-ivory-warm); border-top: 1px solid var(--color-border); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn-secondary" id="secDeleteCancelBtn" style="padding: 9px 18px;">
+          Cancel
+        </button>
+
+        <div style="display: flex; gap: 10px;">
+          <!-- Step 1 Continue Button -->
+          <button type="button" class="btn-primary" id="secDeleteNext1Btn" style="background: #dc2626; border-color: #dc2626; padding: 9px 20px;">
+            Yes, Continue (1/3) →
+          </button>
+
+          <!-- Step 2 Verify & Proceed Button (Disabled until exact text match) -->
+          <button type="button" class="btn-primary" id="secDeleteNext2Btn" style="background: #dc2626; border-color: #dc2626; padding: 9px 20px; display: none;" disabled>
+            Verify Name (2/3) →
+          </button>
+
+          <!-- Step 3 Final Permanent Deletion Button -->
+          <button type="button" class="btn-action-delete" id="secDeleteFinalBtn" style="background: #b91c1c; color: #ffffff; border: 1px solid #7f1d1d; padding: 11px 24px; font-weight: 700; display: none;">
+            <span id="secDeleteFinalBtnText">Permanently Delete (3/3)</span>
+          </button>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-secondary" id="cancelDeleteCategoryBtn">Cancel</button>
-        <button type="button" class="btn-action-delete" id="confirmDeleteCategoryBtn" style="padding: 10px 20px;">
-          Delete Category
-        </button>
-      </div>
+
     </div>
   </div>
 

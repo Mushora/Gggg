@@ -26,8 +26,13 @@ import {
 // State
 let allCategories = [];
 let allProducts = [];
-let productPendingDeleteId = null;
-let categoryPendingDeleteId = null;
+let securityDeleteTarget = {
+  type: null, // 'product' | 'category'
+  id: null,
+  name: '',
+  count: 0,
+  currentStage: 1
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Check Admin Authentication
@@ -429,8 +434,8 @@ function initProductModal() {
   if (searchInput) searchInput.addEventListener('input', renderAdminProductsTable);
   if (catFilter) catFilter.addEventListener('change', renderAdminProductsTable);
 
-  // Delete modal
-  initDeleteProductModal();
+  // 3-Step Security Delete modal
+  initSecurityDeleteModal();
 }
 
 function openEditProductModal(id) {
@@ -462,45 +467,293 @@ function openEditProductModal(id) {
   modal.classList.add('open');
 }
 
-function initDeleteProductModal() {
-  const modal = document.getElementById('deleteProductModal');
-  const targetLabel = document.getElementById('deleteProductTitleTarget');
-  const cancelBtn = document.getElementById('cancelDeleteProductBtn');
-  const closeBtn = document.getElementById('closeDeleteProductModalBtn');
-  const confirmBtn = document.getElementById('confirmDeleteProductBtn');
+/* ============================================================
+   3-STEP SECURITY DELETE CONTROLLER (GITHUB-STYLE VERIFICATION)
+   ============================================================ */
+function initSecurityDeleteModal() {
+  const modal = document.getElementById('securityDeleteModal');
+  const closeBtn = document.getElementById('closeSecDeleteModalBtn');
+  const cancelBtn = document.getElementById('secDeleteCancelBtn');
+  const next1Btn = document.getElementById('secDeleteNext1Btn');
+  const next2Btn = document.getElementById('secDeleteNext2Btn');
+  const finalBtn = document.getElementById('secDeleteFinalBtn');
+  const confirmInput = document.getElementById('secDeleteConfirmInput');
+  const copyBtn = document.getElementById('copySecDeleteTargetBtn');
 
-  if (!modal || !confirmBtn) return;
+  if (!modal) return;
 
-  function closeModal() {
+  function closeSecurityModal() {
     modal.classList.remove('open');
-    productPendingDeleteId = null;
+    modal.style.display = 'none';
+    securityDeleteTarget = { type: null, id: null, name: '', count: 0, currentStage: 1 };
+    if (confirmInput) {
+      confirmInput.value = '';
+      confirmInput.style.borderColor = '';
+      confirmInput.style.backgroundColor = '#fff';
+    }
   }
 
-  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeSecurityModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeSecurityModal);
 
-  confirmBtn.addEventListener('click', async () => {
-    if (!productPendingDeleteId) return;
-    try {
-      await deleteProduct(productPendingDeleteId);
-      showToast('Product deleted from catalog.');
-      closeModal();
-      await refreshAdminData();
-    } catch (err) {
-      console.error('Delete product error:', err);
-      showToast('Could not delete product.', 'error');
-    }
+  // Close on outside overlay click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeSecurityModal();
   });
+
+  // Copy target name button
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      if (securityDeleteTarget.name) {
+        navigator.clipboard.writeText(securityDeleteTarget.name).then(() => {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = 'Copy Name'; }, 1500);
+          if (confirmInput) {
+            confirmInput.value = securityDeleteTarget.name;
+            confirmInput.dispatchEvent(new Event('input'));
+            confirmInput.focus();
+          }
+        }).catch(() => {
+          if (confirmInput) {
+            confirmInput.value = securityDeleteTarget.name;
+            confirmInput.dispatchEvent(new Event('input'));
+            confirmInput.focus();
+          }
+        });
+      }
+    });
+  }
+
+  // STEP 1 -> STEP 2
+  if (next1Btn) {
+    next1Btn.addEventListener('click', () => {
+      setSecurityDeleteStage(2);
+    });
+  }
+
+  // Real-time Text Verification on Step 2 (exact name required)
+  if (confirmInput && next2Btn) {
+    confirmInput.addEventListener('input', () => {
+      const entered = confirmInput.value.trim();
+      const expected = (securityDeleteTarget.name || '').trim();
+      const feedback = document.getElementById('secDeleteMatchFeedback');
+
+      // Case-tolerant exact match comparison for friendly mobile & desktop input
+      const isMatch = entered.toLowerCase() === expected.toLowerCase() && entered.length > 0;
+
+      if (isMatch) {
+        next2Btn.disabled = false;
+        next2Btn.style.opacity = '1';
+        next2Btn.style.cursor = 'pointer';
+        confirmInput.style.borderColor = '#16a34a';
+        confirmInput.style.backgroundColor = '#f0fdf4';
+        if (feedback) {
+          feedback.innerHTML = '<span style="color: #16a34a; font-weight: 600;">✓ Name matched! Click below to proceed to final step.</span>';
+        }
+      } else {
+        next2Btn.disabled = true;
+        next2Btn.style.opacity = '0.5';
+        next2Btn.style.cursor = 'not-allowed';
+        confirmInput.style.backgroundColor = '#fff';
+        if (entered.length === 0) {
+          confirmInput.style.borderColor = '';
+          if (feedback) {
+            feedback.innerHTML = '<span style="color: var(--color-stone);">Type the exact name above to unlock next confirmation.</span>';
+          }
+        } else {
+          confirmInput.style.borderColor = '#dc2626';
+          if (feedback) {
+            feedback.innerHTML = '<span style="color: #dc2626;">❌ Name does not match yet. Please type exact name.</span>';
+          }
+        }
+      }
+    });
+
+    // Enter key automatically submits Step 2 if match is valid
+    confirmInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (!next2Btn.disabled) {
+          setSecurityDeleteStage(3);
+        }
+      }
+    });
+  }
+
+  // STEP 2 -> STEP 3
+  if (next2Btn) {
+    next2Btn.addEventListener('click', () => {
+      const entered = (confirmInput ? confirmInput.value.trim() : '');
+      const expected = (securityDeleteTarget.name || '').trim();
+      if (entered.toLowerCase() !== expected.toLowerCase()) {
+        showToast('Please type the exact name to proceed.', 'error');
+        return;
+      }
+      setSecurityDeleteStage(3);
+    });
+  }
+
+  // STEP 3: FINAL PERMANENT DELETION
+  if (finalBtn) {
+    finalBtn.addEventListener('click', async () => {
+      if (!securityDeleteTarget.id || !securityDeleteTarget.type) return;
+
+      const finalBtnText = document.getElementById('secDeleteFinalBtnText');
+      finalBtn.disabled = true;
+      if (finalBtnText) finalBtnText.textContent = 'Permanently Deleting...';
+
+      try {
+        const itemType = securityDeleteTarget.type;
+        const itemName = securityDeleteTarget.name;
+        const itemId = securityDeleteTarget.id;
+
+        if (itemType === 'product') {
+          await deleteProduct(itemId);
+          showToast(`Product "${itemName}" permanently deleted.`);
+        } else if (itemType === 'category') {
+          await deleteCategory(itemId);
+          showToast(`Category "${itemName}" permanently deleted.`);
+        }
+
+        closeSecurityModal();
+        await refreshAdminData();
+      } catch (err) {
+        console.error('Security deletion error:', err);
+        showToast('Failed to delete: ' + (err.message || 'Unknown error'), 'error');
+        finalBtn.disabled = false;
+        if (finalBtnText) finalBtnText.textContent = 'Permanently Delete (3/3)';
+      }
+    });
+  }
+}
+
+function setSecurityDeleteStage(stageNumber) {
+  securityDeleteTarget.currentStage = stageNumber;
+
+  const step1 = document.getElementById('secDeleteStep1');
+  const step2 = document.getElementById('secDeleteStep2');
+  const step3 = document.getElementById('secDeleteStep3');
+
+  const next1Btn = document.getElementById('secDeleteNext1Btn');
+  const next2Btn = document.getElementById('secDeleteNext2Btn');
+  const finalBtn = document.getElementById('secDeleteFinalBtn');
+
+  const progressBar = document.getElementById('secDeleteProgressBar');
+  const stepBadge = document.getElementById('secDeleteStepBadge');
+  const stepSubtitle = document.getElementById('secDeleteStepSubtitle');
+  const confirmInput = document.getElementById('secDeleteConfirmInput');
+
+  // Hide all step containers
+  if (step1) step1.style.display = 'none';
+  if (step2) step2.style.display = 'none';
+  if (step3) step3.style.display = 'none';
+
+  if (next1Btn) next1Btn.style.display = 'none';
+  if (next2Btn) next2Btn.style.display = 'none';
+  if (finalBtn) finalBtn.style.display = 'none';
+
+  if (stageNumber === 1) {
+    if (step1) step1.style.display = 'block';
+    if (next1Btn) next1Btn.style.display = 'inline-flex';
+    if (progressBar) progressBar.style.width = '33.33%';
+    if (stepBadge) stepBadge.textContent = 'Step 1 of 3';
+    if (stepSubtitle) stepSubtitle.textContent = 'Initial Verification';
+  } else if (stageNumber === 2) {
+    if (step2) step2.style.display = 'block';
+    if (next2Btn) next2Btn.style.display = 'inline-flex';
+    if (progressBar) progressBar.style.width = '66.66%';
+    if (stepBadge) stepBadge.textContent = 'Step 2 of 3';
+    if (stepSubtitle) stepSubtitle.textContent = 'Type Name to Verify';
+
+    if (confirmInput) {
+      confirmInput.value = '';
+      confirmInput.style.borderColor = '';
+      confirmInput.style.backgroundColor = '#fff';
+      setTimeout(() => confirmInput.focus(), 150);
+    }
+    const feedback = document.getElementById('secDeleteMatchFeedback');
+    if (feedback) {
+      feedback.innerHTML = '<span style="color: var(--color-stone);">Type the exact name above to unlock next confirmation.</span>';
+    }
+    if (next2Btn) {
+      next2Btn.disabled = true;
+      next2Btn.style.opacity = '0.5';
+      next2Btn.style.cursor = 'not-allowed';
+    }
+  } else if (stageNumber === 3) {
+    if (step3) step3.style.display = 'block';
+    if (finalBtn) {
+      finalBtn.style.display = 'inline-flex';
+      finalBtn.disabled = false;
+      const finalBtnText = document.getElementById('secDeleteFinalBtnText');
+      if (finalBtnText) finalBtnText.textContent = 'Permanently Delete (3/3)';
+    }
+    if (progressBar) progressBar.style.width = '100%';
+    if (stepBadge) stepBadge.textContent = 'Step 3 of 3';
+    if (stepSubtitle) stepSubtitle.textContent = 'Final Warning';
+  }
+}
+
+function openSecurityDeleteModal({ type, id, name, count = 0 }) {
+  const modal = document.getElementById('securityDeleteModal');
+  if (!modal) return;
+
+  securityDeleteTarget = {
+    type,
+    id,
+    name: (name || 'Untitled').trim(),
+    count: count || 0,
+    currentStage: 1
+  };
+
+  const typeUpper = type === 'product' ? 'GARMENT / PRODUCT' : 'CATEGORY';
+  const typeLower = type === 'product' ? 'product' : 'category';
+
+  const titleElem = document.getElementById('secDeleteModalTitle');
+  if (titleElem) titleElem.textContent = `Delete ${type === 'product' ? 'Product' : 'Category'}`;
+
+  const typeBadge = document.getElementById('secDeleteTypeBadge');
+  if (typeBadge) typeBadge.textContent = typeUpper;
+
+  const typeLabel1 = document.getElementById('secDeleteTypeLabel1');
+  if (typeLabel1) typeLabel1.textContent = typeLower;
+
+  const typeLabel2 = document.getElementById('secDeleteTypeLabel2');
+  if (typeLabel2) typeLabel2.textContent = `${typeLower} name`;
+
+  const nameDisplay1 = document.getElementById('secDeleteItemNameDisplay1');
+  if (nameDisplay1) nameDisplay1.textContent = securityDeleteTarget.name;
+
+  const targetBadge = document.getElementById('secDeleteTargetBadge');
+  if (targetBadge) targetBadge.textContent = securityDeleteTarget.name;
+
+  const nameDisplay3 = document.getElementById('secDeleteItemNameDisplay3');
+  if (nameDisplay3) nameDisplay3.textContent = `"${securityDeleteTarget.name}" (${typeUpper})`;
+
+  // Category with associated products warning
+  const extraWarning = document.getElementById('secDeleteExtraWarning');
+  if (extraWarning) {
+    if (type === 'category' && count > 0) {
+      extraWarning.style.display = 'block';
+      extraWarning.innerHTML = `⚠️ <strong>Attention:</strong> This category currently contains <strong>${count}</strong> product(s).`;
+    } else {
+      extraWarning.style.display = 'none';
+      extraWarning.innerHTML = '';
+    }
+  }
+
+  // Open on Stage 1
+  setSecurityDeleteStage(1);
+  modal.style.display = 'flex';
+  modal.classList.add('open');
 }
 
 function openDeleteProductModal(id, title) {
-  const modal = document.getElementById('deleteProductModal');
-  const targetLabel = document.getElementById('deleteProductTitleTarget');
-  if (!modal) return;
-
-  productPendingDeleteId = id;
-  if (targetLabel) targetLabel.textContent = `"${title}"`;
-  modal.classList.add('open');
+  openSecurityDeleteModal({
+    type: 'product',
+    id: id,
+    name: title
+  });
 }
 
 /* ============================================================
@@ -613,9 +866,6 @@ function initCategoryActions() {
       }
     });
   }
-
-  // Delete Category Modal
-  initDeleteCategoryModal();
 }
 
 function openEditCategoryModal(id) {
@@ -633,57 +883,13 @@ function openEditCategoryModal(id) {
   modal.classList.add('open');
 }
 
-function initDeleteCategoryModal() {
-  const modal = document.getElementById('deleteCategoryModal');
-  const closeBtn = document.getElementById('closeDeleteCategoryModalBtn');
-  const cancelBtn = document.getElementById('cancelDeleteCategoryBtn');
-  const confirmBtn = document.getElementById('confirmDeleteCategoryBtn');
-
-  if (!modal || !confirmBtn) return;
-
-  function closeModal() {
-    modal.classList.remove('open');
-    categoryPendingDeleteId = null;
-  }
-
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-
-  confirmBtn.addEventListener('click', async () => {
-    if (!categoryPendingDeleteId) return;
-    try {
-      await deleteCategory(categoryPendingDeleteId);
-      showToast('Category deleted successfully.');
-      closeModal();
-      await refreshAdminData();
-    } catch (err) {
-      console.error('Delete category error:', err);
-      showToast('Could not delete category.', 'error');
-    }
-  });
-}
-
 function openDeleteCategoryModal(id, name, count) {
-  const modal = document.getElementById('deleteCategoryModal');
-  const notice = document.getElementById('deleteCategoryWarningNotice');
-  if (!modal || !notice) return;
-
-  categoryPendingDeleteId = id;
-
-  if (count > 0) {
-    // Specific warning requirement from brief:
-    // "This category contains X products. Are you sure you want to delete it?"
-    notice.innerHTML = `
-      <div style="background-color: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 4px; margin-bottom: 12px; color: var(--color-danger);">
-        <strong>Warning:</strong> This category contains <strong>${count}</strong> product(s).
-      </div>
-      <p>Deleting "<strong>${escapeHtml(name)}</strong>" will remove this category classification. Are you sure you want to proceed?</p>
-    `;
-  } else {
-    notice.innerHTML = `<p>Are you sure you want to delete category "<strong>${escapeHtml(name)}</strong>"?</p>`;
-  }
-
-  modal.classList.add('open');
+  openSecurityDeleteModal({
+    type: 'category',
+    id: id,
+    name: name,
+    count: count
+  });
 }
 
 /* ============================================================
