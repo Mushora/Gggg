@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=5.0, user-scalable=yes" />
+  <title>Admin Portal Login - Mushora</title>
+  <meta name="description" content="Mushora administrative management console sign-in." />
+  <meta name="robots" content="noindex, nofollow" />
+  
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="admin-login-body">
+
+  <div class="admin-login-wrapper">
+    <div class="admin-login-card">
+      
+      <div class="admin-login-header">
+        <a href="/" class="brand-logo" style="align-items: center;">
+          <span class="brand-name" style="font-size: 1.6rem;">MUSHORA</span>
+          <span class="brand-tagline">Administrative Console</span>
+        </a>
+        <h1 class="admin-login-title">Sign In</h1>
+        <p class="admin-login-subtitle">Enter your administrative credentials to manage products and categories.</p>
+      </div>
+
+      <!-- Error Alert -->
+      <div class="form-error-alert" id="loginErrorAlert" role="alert"></div>
+
+      <!-- Login Form -->
+      <form id="adminLoginForm" novalidate>
+        <div class="form-group">
+          <label for="adminUsername" class="form-label">Username</label>
+          <input 
+            type="text" 
+            id="adminUsername" 
+            class="form-input" 
+            placeholder="admin" 
+            required 
+            autocomplete="username"
+            autofocus
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="adminPassword" class="form-label">Password</label>
+          <input 
+            type="password" 
+            id="adminPassword" 
+            class="form-input" 
+            placeholder="••••••••" 
+            required 
+            autocomplete="current-password"
+          />
+        </div>
+
+        <button type="submit" class="btn-primary" id="loginSubmitBtn" style="width: 100%; margin-top: 10px;">
+          <span id="loginBtnText">Sign In to Dashboard</span>
+          <span id="loginBtnSpinner" style="display: none;">Verifying...</span>
+        </button>
+      </form>
+
+      <!-- Temporary Setup Credentials Hint (As requested in specifications) -->
+      <div class="credentials-hint-box">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+          <div>
+            <strong>Initial Setup Credentials:</strong><br />
+            Username: <code>admin</code><br />
+            Password: <code>admin123</code>
+          </div>
+          <button type="button" id="fillDemoCredentialsBtn" class="btn-outline" style="padding: 4px 10px; font-size: 0.72rem; white-space: nowrap;">
+            Auto-Fill
+          </button>
+        </div>
+        <span style="display: block; margin-top: 6px; color: var(--color-stone);">
+          *You can change your administrative username and password at any time inside the Admin Settings tab.
+        </span>
+      </div>
+
+      <div style="margin-top: 24px; text-align: center;">
+        <a href="/" class="nav-link" style="font-size: 0.82rem; color: var(--color-muted-gray);">
+          ← Return to Public Store
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module" src="/js/admin-login.js"></script>
+</body>
+</html>

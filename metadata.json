@@ -1,0 +1,6 @@
+{
+  "name": "Mushora - Affiliate Fashion & Clothing",
+  "description": "Premium curated fashion affiliate marketplace. Discover timeless essentials, modern wardrobe staples, and exclusive deals from top fashion brands.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

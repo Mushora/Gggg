@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=5.0, user-scalable=yes" />
+  <title>Admin Dashboard - Mushora Fashion</title>
+  <meta name="description" content="Mushora administrative management portal." />
+  <meta name="robots" content="noindex, nofollow" />
+  
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <div class="admin-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-brand">
+        <a href="/" class="brand-logo" style="text-decoration: none;">
+          <span class="brand-name">MUSHORA</span>
+          <span class="brand-tagline">Portal</span>
+        </a>
+      </div>
+
+      <nav class="admin-nav" role="tablist">
+        <button class="admin-nav-item active" data-tab="tabDashboard" role="tab">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="admin-nav-item" data-tab="tabProducts" role="tab">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span>Products</span>
+        </button>
+
+        <button class="admin-nav-item" data-tab="tabCategories" role="tab">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          <span>Categories</span>
+        </button>
+
+        <button class="admin-nav-item" data-tab="tabSettings" role="tab">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Admin Settings</span>
+        </button>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <a href="/" target="_blank" class="btn-sidebar-action">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          <span>View Live Store</span>
+        </a>
+
+        <button id="adminLogoutBtn" class="btn-sidebar-action" style="color: #f87171;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+      
+      <!-- Topbar -->
+      <div class="admin-topbar">
+        <div>
+          <h1 class="admin-page-title" id="adminSectionHeading">Dashboard Overview</h1>
+          <p style="font-size: 0.85rem; color: var(--color-stone); margin-top: 4px;" id="adminUserGreeting">
+            Logged in as Administrator
+          </p>
+        </div>
+
+        <div class="admin-topbar-actions">
+          <button class="btn-primary" id="openAddProductModalBtn">
+            + Add New Product
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 1: DASHBOARD OVERVIEW -->
+      <section id="tabDashboard" class="admin-tab-pane">
+        <!-- Metric Statistics Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value" id="statTotalProducts">0</div>
+            <div class="stat-desc">Active in clothing catalog</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Total Categories</div>
+            <div class="stat-value" id="statTotalCategories">0</div>
+            <div class="stat-desc">Organizing fashion edits</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Featured Garments</div>
+            <div class="stat-value" id="statFeaturedProducts">0</div>
+            <div class="stat-desc">Highlighted on homepage</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Database Status</div>
+            <div class="stat-value" id="statDbStatus" style="font-size: 1.4rem; padding-top: 10px;">Checking...</div>
+            <div class="stat-desc" id="statDbDetail">Storage synchronization</div>
+          </div>
+        </div>
+
+        <!-- Recent Products Panel -->
+        <div class="admin-panel-card">
+          <div class="panel-header">
+            <h2 class="panel-title">Recently Added Garments</h2>
+            <button class="btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;" id="goToProductsTabBtn">
+              View All Products
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Thumbnail</th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Rating</th>
+                  <th>Offer</th>
+                  <th>Affiliate Link</th>
+                </tr>
+              </thead>
+              <tbody id="recentProductsTableBody">
+                <tr><td colspan="6" style="text-align: center; padding: 30px;">Loading garments...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: PRODUCT MANAGEMENT -->
+      <section id="tabProducts" class="admin-tab-pane" style="display: none;">
+        <div class="admin-panel-card">
+          <div class="panel-header">
+            <h2 class="panel-title">All Products</h2>
+            
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+              <!-- Admin Search & Filter -->
+              <input 
+                type="text" 
+                id="adminProductSearch" 
+                class="form-input" 
+                placeholder="Search products..." 
+                style="max-width: 200px; padding: 8px 12px; font-size: 0.85rem;" 
+              />
+              <select id="adminProductCatFilter" class="form-select" style="max-width: 180px; padding: 8px 12px; font-size: 0.85rem;">
+                <option value="all">All Categories</option>
+              </select>
+              <button class="btn-primary" id="openAddProductModalBtn2" style="padding: 8px 16px; font-size: 0.78rem;">
+                + Add Product
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Thumbnail</th>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Rating</th>
+                  <th>Offer / Price</th>
+                  <th>Featured</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminProductsTableBody">
+                <tr><td colspan="7" style="text-align: center; padding: 30px;">Loading products...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: CATEGORY MANAGEMENT -->
+      <section id="tabCategories" class="admin-tab-pane" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 32px; align-items: start;">
+          
+          <!-- Add Category Form Card -->
+          <div class="admin-panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">Add New Category</h2>
+            </div>
+            <form id="addCategoryForm" style="padding: 24px;">
+              <div class="form-group">
+                <label for="newCatName" class="form-label">Category Name *</label>
+                <input type="text" id="newCatName" class="form-input" placeholder="e.g. Knitwear, Denim, Eveningwear" required />
+              </div>
+
+              <div class="form-group">
+                <label for="newCatSlug" class="form-label">URL Slug (Optional)</label>
+                <input type="text" id="newCatSlug" class="form-input" placeholder="auto-generated if empty" />
+              </div>
+
+              <div class="form-group">
+                <label for="newCatDesc" class="form-label">Description (Optional)</label>
+                <textarea id="newCatDesc" class="form-textarea" placeholder="Short editorial overview of this category..." style="min-height: 80px;"></textarea>
+              </div>
+
+              <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">
+                Save Category
+              </button>
+            </form>
+          </div>
+
+          <!-- Existing Categories Table Card -->
+          <div class="admin-panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">Active Categories</h2>
+            </div>
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Category Name</th>
+                    <th>Slug</th>
+                    <th>Products Count</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminCategoriesTableBody">
+                  <tr><td colspan="4" style="text-align: center; padding: 30px;">Loading categories...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 4: ADMIN SETTINGS & CREDENTIALS -->
+      <section id="tabSettings" class="admin-tab-pane" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
+          
+          <!-- Change Credentials Card -->
+          <div class="admin-panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">Change Admin Credentials</h2>
+            </div>
+            <form id="adminCredentialsForm" style="padding: 24px;">
+              <p style="font-size: 0.85rem; color: var(--color-muted-gray); margin-bottom: 20px;">
+                Update your administrative login credentials. Changes are encrypted using salted SHA-256 and stored securely in Firebase/system storage.
+              </p>
+
+              <div class="form-group">
+                <label for="settingsNewUsername" class="form-label">New Username *</label>
+                <input type="text" id="settingsNewUsername" class="form-input" required minlength="3" placeholder="admin" />
+              </div>
+
+              <div class="form-group">
+                <label for="settingsNewPassword" class="form-label">New Password *</label>
+                <input type="password" id="settingsNewPassword" class="form-input" required minlength="6" placeholder="At least 6 characters" />
+              </div>
+
+              <div class="form-group">
+                <label for="settingsConfirmPassword" class="form-label">Confirm New Password *</label>
+                <input type="password" id="settingsConfirmPassword" class="form-input" required minlength="6" placeholder="Repeat new password" />
+              </div>
+
+              <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">
+                Update Credentials
+              </button>
+            </form>
+          </div>
+
+          <!-- Firebase Cloud Sync & Quick Seed Helper -->
+          <div class="admin-panel-card">
+            <div class="panel-header">
+              <h2 class="panel-title">Firebase Data & Seed Helper</h2>
+            </div>
+            <div style="padding: 24px;">
+              <p style="font-size: 0.85rem; color: var(--color-muted-gray); margin-bottom: 16px;">
+                Mushora supports zero-config local operation as well as live Firebase Firestore & Authentication integration.
+              </p>
+
+              <div style="background-color: var(--color-ivory-warm); border: 1px solid var(--color-border); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 20px;">
+                <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-stone); margin-bottom: 4px;">Configuration Status</div>
+                <div id="settingsFirebaseStatusNote" style="font-size: 0.9rem; color: var(--color-black); font-weight: 500;">
+                  Checking Firebase connection...
+                </div>
+              </div>
+
+              <div style="margin-bottom: 20px;">
+                <h3 style="font-size: 0.95rem; font-family: var(--font-serif); margin-bottom: 6px;">One-Click Firestore Catalog Seeding</h3>
+                <p style="font-size: 0.82rem; color: var(--color-muted-gray); line-height: 1.5; margin-bottom: 12px;">
+                  If you just added your live Firebase configuration in <code>js/firebase.js</code>, click below to populate the starter fashion categories and designer garments into your new Firestore database.
+                </p>
+                <button type="button" class="btn-secondary" id="seedFirestoreBtn" style="font-size: 0.78rem;">
+                  ✦ Seed Starter Fashion Catalogue to Firestore
+                </button>
+              </div>
+
+              <div style="padding-top: 16px; border-top: 1px solid var(--color-border-light);">
+                <button type="button" class="btn-secondary" id="resetLocalStoreBtn" style="font-size: 0.75rem; color: var(--color-muted-gray);">
+                  Reset Sample Catalog to Factory Defaults
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ADD / EDIT PRODUCT MODAL -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title" id="productModalTitle">Add New Fashion Piece</h2>
+        <button class="modal-close-btn" id="closeProductModalBtn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <form id="productForm" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="formProductId" />
+
+          <!-- Title -->
+          <div class="form-group">
+            <label for="formProductTitle" class="form-label">Product Title *</label>
+            <input type="text" id="formProductTitle" class="form-input" placeholder="e.g. The Oversized Wool-Blend Trench" required />
+          </div>
+
+          <!-- Category & Merchant -->
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="formProductCategory" class="form-label">Category *</label>
+              <select id="formProductCategory" class="form-select" required>
+                <!-- Populated dynamically from Firebase -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="formProductMerchant" class="form-label">Merchant / Brand Name</label>
+              <input type="text" id="formProductMerchant" class="form-input" placeholder="e.g. Net-A-Porter, SSENSE, Farfetch" />
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label for="formProductDesc" class="form-label">Editorial Description *</label>
+            <textarea id="formProductDesc" class="form-textarea" placeholder="Detail fabric composition, tailoring details, fit recommendations..." required></textarea>
+          </div>
+
+          <!-- Price & Offer Badge -->
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="formProductPrice" class="form-label">Price Guide (Optional)</label>
+              <input type="text" id="formProductPrice" class="form-input" placeholder="e.g. $345 or $190 - $220" />
+            </div>
+
+            <div class="form-group">
+              <label for="formProductOffer" class="form-label">Offer / Discount Badge (Optional)</label>
+              <input type="text" id="formProductOffer" class="form-input" placeholder="e.g. 30% OFF, Limited Edition, Best Seller" />
+            </div>
+          </div>
+
+          <!-- Rating & Featured -->
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="formProductRating" class="form-label">Rating Score (1.0 to 5.0)</label>
+              <input type="number" id="formProductRating" class="form-input" min="1.0" max="5.0" step="0.1" value="4.8" />
+            </div>
+
+            <div class="form-group" style="justify-content: center;">
+              <label class="form-checkbox-label">
+                <input type="checkbox" id="formProductFeatured" />
+                <span>Mark as Featured Garment</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Affiliate URL -->
+          <div class="form-group">
+            <label for="formProductAffiliateUrl" class="form-label">External Affiliate / Merchant URL *</label>
+            <input type="url" id="formProductAffiliateUrl" class="form-input" placeholder="https://partner-merchant.com/product-link?ref=mushora" required />
+            <small style="font-size: 0.75rem; color: var(--color-stone);">Visitors clicking "Shop Deal" or "Shop on Merchant" will be directed to this URL.</small>
+          </div>
+
+          <!-- Multi-Image URLs -->
+          <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--color-border);">
+            <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--color-stone); margin-bottom: 12px;">Product Photography Gallery</div>
+
+            <div class="form-group">
+              <label for="formProductImage1" class="form-label">Main Image URL * (Required)</label>
+              <input type="url" id="formProductImage1" class="form-input" placeholder="https://images.unsplash.com/..." required />
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="formProductImage2" class="form-label">Image 2 URL (Optional)</label>
+                <input type="url" id="formProductImage2" class="form-input" placeholder="https://..." />
+              </div>
+
+              <div class="form-group">
+                <label for="formProductImage3" class="form-label">Image 3 URL (Optional)</label>
+                <input type="url" id="formProductImage3" class="form-input" placeholder="https://..." />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="formProductImage4" class="form-label">Image 4 URL (Optional)</label>
+              <input type="url" id="formProductImage4" class="form-input" placeholder="https://..." />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="cancelProductBtn">Cancel</button>
+          <button type="submit" class="btn-primary" id="saveProductBtn">Save Garment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DELETE PRODUCT CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="deleteProductModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Delete Garment</h2>
+        <button class="modal-close-btn" id="closeDeleteProductModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.95rem; color: var(--color-dark-gray); line-height: 1.6;">
+          Are you sure you want to delete <strong id="deleteProductTitleTarget">this product</strong>?
+        </p>
+        <p style="font-size: 0.82rem; color: var(--color-stone); margin-top: 8px;">
+          This action will permanently remove the item from Firestore and the public website.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancelDeleteProductBtn">Cancel</button>
+        <button type="button" class="btn-action-delete" id="confirmDeleteProductBtn" style="padding: 10px 20px;">
+          Delete Product
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT / RENAME CATEGORY MODAL -->
+  <div class="modal-overlay" id="editCategoryModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Rename Category</h2>
+        <button class="modal-close-btn" id="closeEditCategoryModalBtn">&times;</button>
+      </div>
+      <form id="editCategoryForm">
+        <div class="modal-body">
+          <input type="hidden" id="editCatId" />
+          <div class="form-group">
+            <label for="editCatName" class="form-label">Category Name *</label>
+            <input type="text" id="editCatName" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label for="editCatSlug" class="form-label">Category Slug *</label>
+            <input type="text" id="editCatSlug" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label for="editCatDesc" class="form-label">Description</label>
+            <textarea id="editCatDesc" class="form-textarea" style="min-height: 70px;"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="cancelEditCategoryBtn">Cancel</button>
+          <button type="submit" class="btn-primary">Update Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DELETE CATEGORY WARNING MODAL -->
+  <div class="modal-overlay" id="deleteCategoryModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Delete Category</h2>
+        <button class="modal-close-btn" id="closeDeleteCategoryModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="deleteCategoryWarningNotice" style="font-size: 0.95rem; color: var(--color-dark-gray); line-height: 1.6;">
+          Are you sure you want to delete this category?
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancelDeleteCategoryBtn">Cancel</button>
+        <button type="button" class="btn-action-delete" id="confirmDeleteCategoryBtn" style="padding: 10px 20px;">
+          Delete Category
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Admin JavaScript Controller -->
+  <script type="module" src="/js/admin.js"></script>
+</body>
+</html>

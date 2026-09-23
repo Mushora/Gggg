@@ -1,0 +1,171 @@
+{
+  "entities": {
+    "Category": {
+      "title": "Category",
+      "description": "Fashion category classification for organizing clothing and accessories.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Category document unique identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the fashion category",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-safe slug",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "description": {
+          "type": "string",
+          "description": "Short category description",
+          "maxLength": 300
+        },
+        "order": {
+          "type": "number",
+          "description": "Display order index"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last updated timestamp"
+        }
+      },
+      "required": ["name", "slug"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Affiliate fashion clothing item with external merchant redirect link.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Product title",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed editorial product overview",
+          "minLength": 10,
+          "maxLength": 2500
+        },
+        "category": {
+          "type": "string",
+          "description": "Assigned category name",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "image1": {
+          "type": "string",
+          "description": "Required primary high-resolution product image URL",
+          "minLength": 10,
+          "maxLength": 1000
+        },
+        "image2": {
+          "type": "string",
+          "description": "Optional secondary angle or detail image URL",
+          "maxLength": 1000
+        },
+        "image3": {
+          "type": "string",
+          "description": "Optional tertiary image URL",
+          "maxLength": 1000
+        },
+        "image4": {
+          "type": "string",
+          "description": "Optional fourth lifestyle image URL",
+          "maxLength": 1000
+        },
+        "rating": {
+          "type": "number",
+          "description": "Star rating out of 5.0"
+        },
+        "offer": {
+          "type": "string",
+          "description": "Promotional badge or discount text (e.g., 30% OFF)",
+          "maxLength": 60
+        },
+        "price": {
+          "type": "string",
+          "description": "Display price tag or price guide",
+          "maxLength": 50
+        },
+        "affiliateUrl": {
+          "type": "string",
+          "description": "Direct external merchant referral URL",
+          "minLength": 10,
+          "maxLength": 1500
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Flag indicating if item is pinned in editorial showcase"
+        },
+        "merchant": {
+          "type": "string",
+          "description": "Partner brand or store name",
+          "maxLength": 80
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last updated timestamp"
+        }
+      },
+      "required": ["title", "description", "category", "image1", "affiliateUrl"]
+    },
+    "AdminSettings": {
+      "title": "AdminSettings",
+      "description": "System administrative access credentials and metadata.",
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "Admin username",
+          "minLength": 3,
+          "maxLength": 50
+        },
+        "passwordHash": {
+          "type": "string",
+          "description": "Hashed password using SHA-256",
+          "maxLength": 128
+        },
+        "salt": {
+          "type": "string",
+          "description": "Cryptographic salt for verification",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last updated timestamp"
+        }
+      },
+      "required": ["username", "passwordHash"]
+    }
+  },
+  "firestore": {
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Publicly readable fashion categories managed by authenticated admin"
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Publicly readable affiliate clothing products managed by authenticated admin"
+    },
+    "/adminSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/AdminSettings" },
+      "description": "Administrative credential settings accessible strictly to verified admin"
+    }
+  }
+}

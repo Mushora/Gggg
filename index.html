@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=5.0, user-scalable=yes" />
+  <title>Mushora - Affiliate Fashion & Clothing</title>
+  <meta name="description" content="Premium curated fashion affiliate marketplace. Discover timeless essentials, modern wardrobe staples, and exclusive deals from top fashion brands." />
+  
+  <!-- Open Graph / Social Cards -->
+  <meta property="og:title" content="Mushora - Affiliate Fashion & Clothing" />
+  <meta property="og:description" content="Discover curated fashion finds, timeless essentials, and exclusive merchant deals." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- Announcement Bar -->
+  <div class="announcement-bar">
+    <span>The Autumn/Winter Edit · Curated Designer Collections</span>
+    <span class="announcement-divider">|</span>
+    <span>Direct Partner Deals & Verified Offers</span>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="brand-logo" aria-label="Mushora Homepage">
+        <span class="brand-name">MUSHORA</span>
+        <span class="brand-tagline">Curated Fashion Edit</span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="desktop-nav" aria-label="Main Navigation">
+        <a href="#catalogSection" class="nav-link active">Collection</a>
+        
+        <!-- Dynamic Categories Dropdown -->
+        <div class="nav-categories-dropdown">
+          <a href="#catalogSection" class="nav-link" id="navCategoriesTrigger">
+            Categories ▾
+          </a>
+          <div class="dropdown-menu" id="headerCategoriesDropdown">
+            <!-- Dynamically populated from Firebase -->
+          </div>
+        </div>
+
+        <a href="#aboutSection" class="nav-link">About</a>
+        <a href="#faqSection" class="nav-link">FAQ</a>
+      </nav>
+
+      <!-- Header Actions -->
+      <div class="header-actions">
+        <!-- Discreet Admin Access Button -->
+        <a href="/admin-login.html" class="btn-admin-link" title="Administrator Portal Login" id="adminHeaderLink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Admin</span>
+        </a>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-drawer-overlay" id="mobileDrawerOverlay"></div>
+  <aside class="mobile-drawer" id="mobileDrawer" aria-label="Mobile Navigation">
+    <div>
+      <div style="margin-bottom: 24px;">
+        <span class="brand-name" style="font-size: 1.5rem;">MUSHORA</span>
+      </div>
+      <nav class="mobile-nav-links">
+        <a href="#catalogSection" class="mobile-nav-link mobile-link-close">Collection</a>
+        <a href="#aboutSection" class="mobile-nav-link mobile-link-close">Our Curation</a>
+        <a href="#faqSection" class="mobile-nav-link mobile-link-close">FAQ</a>
+        
+        <div class="mobile-categories-title">Categories</div>
+        <div id="mobileCategoriesList" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Populated from Firebase -->
+        </div>
+      </nav>
+    </div>
+
+    <div style="padding-top: 24px; border-top: 1px solid var(--color-border);">
+      <a href="/admin-login.html" class="btn-secondary" style="width: 100%; font-size: 0.78rem;">
+        Administrator Login
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main>
+
+    <!-- Editorial Hero Section -->
+    <section class="hero-editorial">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="hero-kicker">Curated Fashion Destination</div>
+          <h1 class="hero-title">Discover Your <em>Everyday Style</em></h1>
+          <p class="hero-description">
+            Mushora curates timeless essentials, refined silhouettes, and standout designer garments from leading fashion houses. Explore hand-selected pieces with direct access to official merchant deals.
+          </p>
+          <div class="hero-actions">
+            <a href="#catalogSection" class="btn-primary">
+              Explore Collection
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+            <a href="#faqSection" class="btn-secondary">How It Works</a>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="hero-image-wrapper">
+            <img 
+              src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80" 
+              alt="Editorial fashion model wearing curated luxury outfit" 
+              loading="eager"
+            />
+          </div>
+          <div class="hero-floating-card">
+            <div class="hero-floating-card-kicker">Featured Edit</div>
+            <div class="hero-floating-card-title">Autumn Tailoring & Outerwear</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust & Discovery Value Strip -->
+    <section class="value-strip" id="aboutSection">
+      <div class="container value-strip-grid">
+        <div class="value-item">
+          <div class="value-icon">✧</div>
+          <div>
+            <div class="value-title">Hand-Curated Selection</div>
+            <div class="value-desc">Each piece is editorially reviewed for fabric quality, cut, and enduring style.</div>
+          </div>
+        </div>
+
+        <div class="value-item">
+          <div class="value-icon">⚲</div>
+          <div>
+            <div class="value-title">Direct Merchant Links</div>
+            <div class="value-desc">Shop directly at verified official retailers, flagship boutiques, and authorized stockists.</div>
+          </div>
+        </div>
+
+        <div class="value-item">
+          <div class="value-icon">%</div>
+          <div>
+            <div class="value-title">Verified Discounts</div>
+            <div class="value-desc">Real-time promotional offers and partner promotional codes highlighted across all garments.</div>
+          </div>
+        </div>
+
+        <div class="value-item">
+          <div class="value-icon">✦</div>
+          <div>
+            <div class="value-title">Transparent Curation</div>
+            <div class="value-desc">Independent fashion editorial. Affiliate partnerships support our research with zero markups to you.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Catalog & Filter Section -->
+    <section class="catalog-section" id="catalogSection">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-kicker">Curated Fashion Catalog</div>
+          <h2 class="section-title">The Seasonal Wardrobe</h2>
+          <p class="section-subtitle">
+            Browse our hand-picked apparel catalog. Filter by category, search by style, and discover external merchant offers.
+          </p>
+        </div>
+
+        <!-- Controls: Category Tabs & Search/Sort Bar -->
+        <div class="catalog-controls">
+          <!-- Dynamic Category Tabs -->
+          <div class="filter-tabs-wrapper" id="categoryFilterTabs" role="tablist">
+            <button class="filter-tab active" data-category="all" role="tab" aria-selected="true">
+              All Garments
+            </button>
+            <!-- Categories injected here -->
+          </div>
+
+          <!-- Search and Sort Bar -->
+          <div class="search-sort-bar">
+            <div class="search-input-wrapper">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input 
+                type="text" 
+                id="catalogSearchInput" 
+                class="search-input" 
+                placeholder="Search by title, garment, designer or keyword..." 
+                aria-label="Search garments"
+              />
+            </div>
+
+            <div class="sort-select-wrapper">
+              <label for="catalogSortSelect" class="sort-label">Sort by:</label>
+              <select id="catalogSortSelect" class="sort-select">
+                <option value="featured">Featured First</option>
+                <option value="newest">Newest Arrivals</option>
+                <option value="rating-desc">Highest Rated</option>
+                <option value="title-asc">Alphabetical (A-Z)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Grid Container -->
+        <div class="product-grid" id="productGrid" aria-live="polite">
+          <!-- Initial skeleton placeholders while loading -->
+          <div class="skeleton-card">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-body">
+              <div class="skeleton-line" style="width: 40%;"></div>
+              <div class="skeleton-line" style="width: 80%;"></div>
+              <div class="skeleton-line" style="width: 60%;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-body">
+              <div class="skeleton-line" style="width: 40%;"></div>
+              <div class="skeleton-line" style="width: 80%;"></div>
+              <div class="skeleton-line" style="width: 60%;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-body">
+              <div class="skeleton-line" style="width: 40%;"></div>
+              <div class="skeleton-line" style="width: 80%;"></div>
+              <div class="skeleton-line" style="width: 60%;"></div>
+            </div>
+          </div>
+          <div class="skeleton-card">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-body">
+              <div class="skeleton-line" style="width: 40%;"></div>
+              <div class="skeleton-line" style="width: 80%;"></div>
+              <div class="skeleton-line" style="width: 60%;"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FAQ Accordion Section -->
+    <section class="faq-section" id="faqSection">
+      <div class="container faq-container">
+        
+        <div class="section-header">
+          <div class="section-kicker">Frequently Asked Questions</div>
+          <h2 class="section-title">Everything You Need to Know</h2>
+          <p class="section-subtitle">
+            Learn more about how Mushora curates clothing and helps you discover affiliate fashion deals safely.
+          </p>
+        </div>
+
+        <div class="faq-list" id="faqList">
+
+          <!-- Question 1 -->
+          <div class="faq-card open">
+            <button class="faq-question" aria-expanded="true">
+              <span>1. What is Mushora?</span>
+              <span class="faq-icon-toggle">+</span>
+            </button>
+            <div class="faq-answer">
+              Mushora is a dedicated clothing and fashion affiliate discovery platform. We curate high-quality fashion essentials, contemporary tailoring, outerwear, and statement pieces from premier brands and trusted merchant partners, bringing them into one aesthetic, organized space for seamless shopping inspiration.
+            </div>
+          </div>
+
+          <!-- Question 2 -->
+          <div class="faq-card">
+            <button class="faq-question" aria-expanded="false">
+              <span>2. How does Mushora work?</span>
+              <span class="faq-icon-toggle">+</span>
+            </button>
+            <div class="faq-answer">
+              Our fashion team reviews and catalogs standout garments across multiple categories (such as Dresses, Outerwear, Tailoring, and Accessories). When you find an item you love, clicking "Shop Now" or the affiliate link takes you directly to the official merchant's website to complete your order safely.
+            </div>
+          </div>
+
+          <!-- Question 3 -->
+          <div class="faq-card">
+            <button class="faq-question" aria-expanded="false">
+              <span>3. Are the products sold directly by Mushora?</span>
+              <span class="faq-icon-toggle">+</span>
+            </button>
+            <div class="faq-answer">
+              No. Mushora does not stock inventory, warehouse clothing, or process customer payments directly. We act purely as a curated editorial guide and affiliate marketing portal connecting discerning shoppers to verified retailers and boutique designers.
+            </div>
+          </div>
+
+          <!-- Question 4 -->
+          <div class="faq-card">
+            <button class="faq-question" aria-expanded="false">
+              <span>4. Where will I purchase the products?</span>
+              <span class="faq-icon-toggle">+</span>
+            </button>
+            <div class="faq-answer">
+              You will complete your purchase directly on the external partner store (such as Net-A-Porter, SSENSE, Farfetch, Mytheresa, or official brand websites). All transactions, shipping, warranties, and returns are handled by the respective merchant according to their policies.
+            </div>
+          </div>
+
+          <!-- Question 5 -->
+          <div class="faq-card">
+            <button class="faq-question" aria-expanded="false">
+              <span>5. How do I view a product?</span>
+              <span class="faq-icon-toggle">+</span>
+            </button>
+            <div class="faq-answer">
+              Simply click on any product card in our catalog. You will be taken to that product's dedicated details page where you can examine multi-angle high-resolution photographs, check the fabric breakdown and fit notes, review rating details, and find the direct merchant link.
+            </div>
+          </div>
+
+          <!-- Question 6 -->
+          <div class="faq-card">
+            <button class="faq-question" aria-expanded="false">
+              <span>6. Are the prices and offers guaranteed?</span>
+              <span class="faq-icon-toggle">+</span>
+            </button>
+            <div class="faq-answer">
+              While we update promotions, discount tags, and pricing guidelines frequently, product availability and final prices are determined solely by the merchant at checkout. We encourage users to verify current sizing and stock on the merchant's checkout page.
+            </div>
+          </div>
+
+          <!-- Question 7 -->
+          <div class="faq-card">
+            <button class="faq-question" aria-expanded="false">
+              <span>7. What happens when I click "Shop Now"?</span>
+              <span class="faq-icon-toggle">+</span>
+            </button>
+            <div class="faq-answer">
+              When you click "Shop Now" or the merchant affiliate button, you are redirected in a safe new browser tab to the merchant's secure product page. Mushora may receive an affiliate referral commission if you complete a qualifying purchase, at zero additional cost to you.
+            </div>
+          </div>
+
+          <!-- Question 8 -->
+          <div class="faq-card">
+            <button class="faq-question" aria-expanded="false">
+              <span>8. How can I contact Mushora?</span>
+              <span class="faq-icon-toggle">+</span>
+            </button>
+            <div class="faq-answer">
+              For partnership inquiries, brand collaborations, or editorial curation suggestions, you can reach out via email at editorial@mushora.com. For questions regarding orders, shipping, or returns of previously purchased items, please contact the merchant where you made your purchase directly.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Premium Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="brand-name">MUSHORA</span>
+          <div class="brand-tagline">Curated Fashion Edit</div>
+          <p class="footer-brand-desc">
+            Mushora is an independent fashion curation platform connecting style enthusiasts with exceptional garments and verified deals worldwide.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="footer-col-title">Navigation</h3>
+          <ul class="footer-links">
+            <li><a href="#catalogSection" class="footer-link">Full Collection</a></li>
+            <li><a href="#aboutSection" class="footer-link">About Our Curation</a></li>
+            <li><a href="#faqSection" class="footer-link">Frequently Asked Questions</a></li>
+            <li><a href="/admin-login.html" class="footer-link">Admin Portal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer-col-title">Categories</h3>
+          <ul class="footer-links" id="footerCategoriesList">
+            <!-- Dynamically populated from Firebase -->
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer-col-title">Affiliate Inquiries</h3>
+          <ul class="footer-links">
+            <li><a href="#faqSection" class="footer-link">Partner Opportunities</a></li>
+            <li><a href="mailto:partnerships@mushora.com" class="footer-link">Brand Curation</a></li>
+            <li><a href="#faqSection" class="footer-link">Merchant Disclosure</a></li>
+            <li><a href="/admin-login.html" class="footer-link" style="opacity: 0.5;">Internal Dashboard</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Affiliate Disclosure Banner -->
+      <div class="footer-disclosure">
+        <div class="disclosure-card">
+          <div class="disclosure-icon">ℹ</div>
+          <div class="disclosure-text">
+            <strong>Affiliate Disclosure:</strong> Mushora may earn an affiliate commission when you purchase products through certain links on this website. This does not affect the price you pay in any way, nor does it influence our editorial integrity. All items are independently chosen and cataloged for their quality, design, and value.
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026 Mushora. All rights reserved. Curated with precision.
+        </div>
+        <div class="footer-bottom-links">
+          <a href="#faqSection" class="footer-link">Privacy Policy</a>
+          <a href="#faqSection" class="footer-link">Terms of Service</a>
+          <a href="/admin-login.html" class="footer-link">Admin</a>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="assertive"></div>
+
+  <!-- Vanilla JavaScript Logic -->
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
